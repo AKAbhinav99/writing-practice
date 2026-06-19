@@ -85,6 +85,84 @@ body {
   font-size: 1rem;
 }
 
+.settings-toggle {
+  margin-top: 0.75rem;
+  border: none;
+  background: none;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.settings-toggle:hover {
+  color: var(--color-accent-dark);
+}
+
+.settings-toggle:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.settings-panel {
+  width: 100%;
+  max-width: 64rem;
+  margin-bottom: 1.5rem;
+  padding: 1.1rem 1.3rem;
+  border-radius: 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.settings-status {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-accent-dark);
+}
+
+.settings-panel label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  margin-bottom: 0.4rem;
+}
+
+.settings-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.settings-row input {
+  flex: 1;
+  min-width: 12rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  border: 2px solid var(--color-border);
+  background: #fff;
+  color: var(--color-ink);
+}
+
+.settings-row input:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.settings-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
 main {
   width: 100%;
   max-width: 64rem;

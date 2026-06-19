@@ -38,6 +38,13 @@
   const retrySetBtn = document.getElementById("retrySetBtn");
   const anotherSetBtn = document.getElementById("anotherSetBtn");
 
+  const settingsToggle = document.getElementById("settingsToggle");
+  const settingsPanel = document.getElementById("settingsPanel");
+  const settingsStatus = document.getElementById("settingsStatus");
+  const geminiKeyInput = document.getElementById("geminiKeyInput");
+  const saveGeminiKeyBtn = document.getElementById("saveGeminiKeyBtn");
+  const clearGeminiKeyBtn = document.getElementById("clearGeminiKeyBtn");
+
   let currentFilter = "all";
   let selectedSet = null;
   let sessionStartTime = null;
@@ -217,15 +224,18 @@
     clearInterval(timerInterval);
     timerInterval = null;
 
+    const usingGemini = window.WP.hasGeminiKey();
+
     writingInput.disabled = true;
     submitPassword.disabled = true;
     submitBtn.disabled = true;
-    submitBtn.textContent = "Checking your writing…";
+    submitBtn.textContent = usingGemini ? "Checking with Gemini…" : "Checking your writing…";
     formError.hidden = true;
 
     try {
-      const apiMatches = await window.WP.checkText(text);
-      const matches = [...apiMatches, ...window.WP.runHeuristicRules(text)];
+      const matches = usingGemini
+        ? await window.WP.checkTextWithGemini(text)
+        : [...(await window.WP.checkText(text)), ...window.WP.runHeuristicRules(text)];
       const wordsUsedCount = window.WP.countWordsUsedFromBank(selectedSet.words, text);
       showResults({
         set: selectedSet,
@@ -237,7 +247,9 @@
       });
     } catch (error) {
       formError.hidden = false;
-      formError.textContent = "Couldn't reach the grammar checker — check your connection and try submitting again.";
+      formError.textContent = usingGemini
+        ? `Couldn't get a response from Gemini (${error.message}). Check your API key in Settings, or clear it to use the free checker.`
+        : "Couldn't reach the grammar checker — check your connection and try submitting again.";
       writingInput.disabled = false;
       submitPassword.disabled = false;
       submitBtn.disabled = false;
@@ -282,8 +294,15 @@
     showScreen(browseScreen);
   }
 
+  function syncSettingsStatus() {
+    settingsStatus.textContent = window.WP.hasGeminiKey()
+      ? "Currently checking with: Gemini (AI review)."
+      : "Currently checking with: the free checker (LanguageTool + built-in rules).";
+  }
+
   renderFilterChips();
   renderSetGrid();
+  syncSettingsStatus();
 
   surpriseBtn.addEventListener("click", () => {
     const randomSet = PRACTICE_SETS[Math.floor(Math.random() * PRACTICE_SETS.length)];
@@ -313,4 +332,24 @@
   writingForm.addEventListener("submit", handleSubmit);
   retrySetBtn.addEventListener("click", () => openPracticeScreen(selectedSet));
   anotherSetBtn.addEventListener("click", () => showScreen(browseScreen));
+
+  settingsToggle.addEventListener("click", () => {
+    const isOpen = !settingsPanel.hidden;
+    settingsPanel.hidden = isOpen;
+    settingsToggle.setAttribute("aria-expanded", String(!isOpen));
+  });
+
+  saveGeminiKeyBtn.addEventListener("click", () => {
+    const key = geminiKeyInput.value.trim();
+    if (!key) return;
+    window.WP.setGeminiApiKey(key);
+    geminiKeyInput.value = "";
+    syncSettingsStatus();
+  });
+
+  clearGeminiKeyBtn.addEventListener("click", () => {
+    window.WP.clearGeminiApiKey();
+    geminiKeyInput.value = "";
+    syncSettingsStatus();
+  });
 })();

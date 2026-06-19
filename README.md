@@ -5,9 +5,10 @@ given words into a paragraph or two, and get back spelling, grammar, and
 style feedback with the exact spots highlighted — plus how long it took you.
 
 No build step, no server of its own, no dependencies. It's plain
-HTML/CSS/JS. The only network call it makes is to the free
+HTML/CSS/JS. By default the only network call it makes is to the free
 [LanguageTool](https://languagetool.org) grammar-check API when you submit
-your writing.
+your writing — see [AI checking with Gemini](#ai-checking-with-gemini-optional)
+below for an optional, much stronger alternative.
 
 ## Running it
 
@@ -45,6 +46,28 @@ python3 -m http.server 8000
     explanation), plus the same issues listed below with suggested fixes.
 - **Write This Set Again** restarts the same set from a blank page;
   **Try Another Set** goes back to the grid.
+
+## AI checking with Gemini (optional)
+
+The free LanguageTool checker (plus a few hand-written rules for comma
+splices, missing-subject fragments, redundant conjunctions, and
+indefinite-pronoun agreement) is pattern-based — it catches a lot, but it
+doesn't *understand* the writing the way a model does. If you want
+noticeably better feedback, click **AI Checker Settings** under the title
+and paste in a [Gemini API key](https://aistudio.google.com/apikey) (Google
+gives a free tier). Once a key is saved, submissions go straight to Gemini
+instead of the free checker.
+
+**Where the key lives:** only in your browser's `localStorage`. It is never
+written to any file in this project, never committed to git, and never
+sent anywhere except directly from your browser to Google's API when you
+submit writing. Clearing it (the "Clear saved key" link) or opening the
+site in a different browser/profile goes back to the free checker. Because
+this repo is public, **never** paste a real key into `js/gemini.js` or any
+other file — always enter it through the Settings panel in the running
+page.
+
+To change the model, edit the `MODEL` constant in `js/gemini.js`.
 
 ## Customizing the practice sets
 

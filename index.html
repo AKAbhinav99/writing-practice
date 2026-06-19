@@ -13,7 +13,33 @@
   <header class="site-header">
     <h1>Writing Practice</h1>
     <p class="tagline">Ten words, one prompt, your story.</p>
+    <button type="button" class="settings-toggle" id="settingsToggle" aria-expanded="false" aria-controls="settingsPanel">
+      AI Checker Settings
+    </button>
   </header>
+
+  <div class="settings-panel" id="settingsPanel" hidden>
+    <p class="settings-status" id="settingsStatus">Currently checking with: the free checker (LanguageTool + built-in rules).</p>
+
+    <label for="geminiKeyInput">Gemini API key</label>
+    <div class="settings-row">
+      <input
+        type="password"
+        id="geminiKeyInput"
+        autocomplete="off"
+        placeholder="Paste your key here"
+      />
+      <button type="button" class="secondary-btn" id="saveGeminiKeyBtn">Save</button>
+      <button type="button" class="back-link" id="clearGeminiKeyBtn">Clear saved key</button>
+    </div>
+
+    <p class="settings-note">
+      Saved only in this browser's local storage. It is never written to any
+      file in this project and never sent anywhere except directly to
+      Google's Gemini API when you submit writing. Clearing it (or using a
+      different browser) goes back to the free checker.
+    </p>
+  </div>
 
   <main>
     <section class="browse-screen screen-enter" id="browseScreen" aria-labelledby="browse-heading">
@@ -134,6 +160,7 @@
   <script src="js/sets.js"></script>
   <script src="js/languagetool.js"></script>
   <script src="js/grammar-rules.js"></script>
+  <script src="js/gemini.js"></script>
   <script src="js/text-utils.js"></script>
   <script src="js/highlight.js"></script>
   <script src="js/encouragement.js"></script>
