@@ -10,7 +10,7 @@
       const response = await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ text, language: "en-US" }),
+        body: new URLSearchParams({ text, language: "en-US", level: "picky" }),
         signal: controller.signal,
       });
 

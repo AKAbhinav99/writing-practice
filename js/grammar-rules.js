@@ -225,8 +225,64 @@
     return matches;
   }
 
+  // LanguageTool's free tier consistently misses this one (verified
+  // directly: "Each of the students have...", "Neither of the answers
+  // are...", and "Everybody else have..." all pass unflagged). "Each",
+  // "either", "neither", and the "-body"/"-one" pronouns are always
+  // singular, regardless of a plural noun sitting next to them in an "of
+  // the ..." phrase.
+  const SINGULAR_TO_PLURAL_VERB = { has: "have", is: "are", was: "were", does: "do" };
+  const PLURAL_TO_SINGULAR_VERB = Object.fromEntries(
+    Object.entries(SINGULAR_TO_PLURAL_VERB).map(([singular, plural]) => [plural, singular])
+  );
+  const PLURAL_VERB_PATTERN = Object.keys(PLURAL_TO_SINGULAR_VERB).join("|");
+
+  function findIndefinitePronounAgreement(text) {
+    const matches = [];
+
+    const ofPhraseRe = new RegExp(`\\b(each|either|neither|every one)\\s+of\\b[^,.!?;:]{1,40}?\\b(${PLURAL_VERB_PATTERN})\\b`, "gi");
+    let ofMatch;
+    while ((ofMatch = ofPhraseRe.exec(text)) !== null) {
+      const verb = ofMatch[2];
+      const verbOffset = ofMatch.index + ofMatch[0].lastIndexOf(verb);
+      matches.push(
+        buildMatch(
+          verbOffset,
+          verb.length,
+          `"${ofMatch[1]}" takes a singular verb even with a plural noun after "of" — use "${PLURAL_TO_SINGULAR_VERB[verb.toLowerCase()]}" instead of "${verb}".`,
+          [{ value: PLURAL_TO_SINGULAR_VERB[verb.toLowerCase()] }]
+        )
+      );
+    }
+
+    const standaloneRe = new RegExp(
+      `\\b(everybody|everyone|somebody|someone|anybody|anyone|nobody|no one)\\s+(?:else\\s+)?(${PLURAL_VERB_PATTERN})\\b`,
+      "gi"
+    );
+    let standaloneMatch;
+    while ((standaloneMatch = standaloneRe.exec(text)) !== null) {
+      const verb = standaloneMatch[2];
+      const verbOffset = standaloneMatch.index + standaloneMatch[0].lastIndexOf(verb);
+      matches.push(
+        buildMatch(
+          verbOffset,
+          verb.length,
+          `"${standaloneMatch[1]}" is singular — use "${PLURAL_TO_SINGULAR_VERB[verb.toLowerCase()]}" instead of "${verb}".`,
+          [{ value: PLURAL_TO_SINGULAR_VERB[verb.toLowerCase()] }]
+        )
+      );
+    }
+
+    return matches;
+  }
+
   function runHeuristicRules(text) {
-    return [...findCommaSplices(text), ...findMissingSubjectFragments(text), ...findRedundantConjunctions(text)];
+    return [
+      ...findCommaSplices(text),
+      ...findMissingSubjectFragments(text),
+      ...findRedundantConjunctions(text),
+      ...findIndefinitePronounAgreement(text),
+    ];
   }
 
   window.WP = window.WP || {};
