@@ -224,7 +224,8 @@
     formError.hidden = true;
 
     try {
-      const matches = await window.WP.checkText(text);
+      const apiMatches = await window.WP.checkText(text);
+      const matches = [...apiMatches, ...window.WP.runHeuristicRules(text)];
       const wordsUsedCount = window.WP.countWordsUsedFromBank(selectedSet.words, text);
       showResults({
         set: selectedSet,
