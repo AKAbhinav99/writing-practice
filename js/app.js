@@ -1,9 +1,11 @@
 (() => {
   const MIN_WORDS = 40;
   const MAX_CHARS = 3000;
+  const SUBMIT_PASSWORD = "1905";
 
   const browseScreen = document.getElementById("browseScreen");
   const surpriseBtn = document.getElementById("surpriseBtn");
+  const customBtn = document.getElementById("customBtn");
   const filterRow = document.getElementById("filterRow");
   const setGrid = document.getElementById("setGrid");
 
@@ -11,6 +13,7 @@
   const backToBrowseBtn = document.getElementById("backToBrowseBtn");
   const practiceTitle = document.getElementById("practiceTitle");
   const practicePrompt = document.getElementById("practicePrompt");
+  const wordBankBlock = document.getElementById("wordBankBlock");
   const wordBank = document.getElementById("wordBank");
   const timerChip = document.getElementById("timerChip");
   const wordCountChip = document.getElementById("wordCountChip");
@@ -18,12 +21,14 @@
   const writingForm = document.getElementById("writingForm");
   const writingInput = document.getElementById("writingInput");
   const charCounter = document.getElementById("charCounter");
+  const submitPassword = document.getElementById("submitPassword");
   const submitBtn = document.getElementById("submitBtn");
   const formError = document.getElementById("formError");
 
   const resultsScreen = document.getElementById("resultsScreen");
   const resultTime = document.getElementById("resultTime");
   const resultWordCount = document.getElementById("resultWordCount");
+  const resultUsageStat = document.getElementById("resultUsageStat");
   const resultUsage = document.getElementById("resultUsage");
   const resultIssues = document.getElementById("resultIssues");
   const encouragementBox = document.getElementById("encouragementBox");
@@ -137,6 +142,7 @@
     startWritingBtn.hidden = false;
     writingInput.value = "";
     writingInput.disabled = true;
+    submitPassword.value = "";
     submitBtn.disabled = true;
     submitBtn.textContent = "Submit for Feedback";
     charCounter.textContent = `0 / ${MAX_CHARS}`;
@@ -151,6 +157,7 @@
     practiceTitle.textContent = set.title;
     practicePrompt.textContent = set.prompt;
 
+    wordBankBlock.hidden = set.words.length === 0;
     wordBank.textContent = "";
     set.words.forEach((word) => {
       const chip = document.createElement("span");
@@ -198,11 +205,20 @@
       return;
     }
 
+    if (submitPassword.value !== SUBMIT_PASSWORD) {
+      formError.hidden = false;
+      formError.textContent = "Incorrect submit password.";
+      submitPassword.value = "";
+      submitPassword.focus();
+      return;
+    }
+
     const finishedAt = elapsedSeconds();
     clearInterval(timerInterval);
     timerInterval = null;
 
     writingInput.disabled = true;
+    submitPassword.disabled = true;
     submitBtn.disabled = true;
     submitBtn.textContent = "Checking your writing…";
     formError.hidden = true;
@@ -222,6 +238,7 @@
       formError.hidden = false;
       formError.textContent = "Couldn't reach the grammar checker — check your connection and try submitting again.";
       writingInput.disabled = false;
+      submitPassword.disabled = false;
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit for Feedback";
       timerInterval = setInterval(updateTimerChip, 1000);
@@ -231,6 +248,7 @@
   function showResults({ set, text, matches, wordCount, wordsUsedCount, elapsedSeconds: seconds }) {
     resultTime.textContent = window.WP.formatTime(seconds);
     resultWordCount.textContent = String(wordCount);
+    resultUsageStat.hidden = set.words.length === 0;
     resultUsage.textContent = `${wordsUsedCount}/${set.words.length}`;
     resultIssues.textContent = String(matches.length);
 
@@ -270,6 +288,8 @@
     const randomSet = PRACTICE_SETS[Math.floor(Math.random() * PRACTICE_SETS.length)];
     openPracticeScreen(randomSet);
   });
+
+  customBtn.addEventListener("click", () => openPracticeScreen(CUSTOM_SET));
 
   filterRow.addEventListener("click", (event) => {
     const chip = event.target.closest(".filter-chip");

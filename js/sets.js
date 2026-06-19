@@ -9,6 +9,14 @@ const CATEGORY_META = {
   celebrations: { label: "Celebrations & Milestones", color: "#e0a82e" },
 };
 
+const CUSTOM_SET = {
+  id: "custom",
+  category: null,
+  title: "Freeform Writing",
+  words: [],
+  prompt: "Write about anything you'd like — there's no required topic or word list this time.",
+};
+
 const PRACTICE_SETS = [
   { id: 1, category: "everyday", title: "The Coffee Shop Window Seat", words: ["aroma", "hurried", "regulars", "steam", "notebook", "drizzle", "barista", "lingered", "familiar"], prompt: "Write about an ordinary morning at a coffee shop that turns out to be more interesting than expected." },
   { id: 2, category: "everyday", title: "Power Outage", words: ["flicker", "candle", "silence", "generator", "flashlight", "neighbors", "stranded", "melted", "glow"], prompt: "Describe what happens when the power goes out in your home for an entire evening." },

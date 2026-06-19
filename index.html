@@ -20,10 +20,17 @@
       <h2 id="browse-heading" class="sr-only">Choose a practice set</h2>
 
       <div class="browse-toolbar">
-        <button type="button" class="surprise-btn" id="surpriseBtn">
-          <span class="surprise-btn-label">Surprise Me</span>
-          <span class="surprise-btn-sub">Pick a random set and jump right in</span>
-        </button>
+        <div class="toolbar-tiles">
+          <button type="button" class="surprise-btn" id="surpriseBtn">
+            <span class="surprise-btn-label">Surprise Me</span>
+            <span class="surprise-btn-sub">Pick a random set and jump right in</span>
+          </button>
+
+          <button type="button" class="surprise-btn custom-btn" id="customBtn">
+            <span class="surprise-btn-label">Write Your Own</span>
+            <span class="surprise-btn-sub">No prompt, no word list — just write whatever's on your mind</span>
+          </button>
+        </div>
 
         <div class="filter-row" id="filterRow" role="group" aria-label="Filter sets by category"></div>
       </div>
@@ -37,7 +44,7 @@
       <h2 class="practice-title" id="practiceTitle"></h2>
       <p class="practice-prompt" id="practicePrompt"></p>
 
-      <div class="word-bank-block">
+      <div class="word-bank-block" id="wordBankBlock">
         <p class="word-bank-label">Use these words somewhere in your writing:</p>
         <div class="word-bank" id="wordBank" aria-label="Words to include in your writing"></div>
       </div>
@@ -60,6 +67,18 @@
 
         <div class="form-footer">
           <span class="char-counter" id="charCounter">0 / 3000</span>
+
+          <div class="password-row">
+            <label for="submitPassword">Submit Password</label>
+            <input
+              type="password"
+              id="submitPassword"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="••••"
+            />
+          </div>
+
           <button type="submit" class="check-btn" id="submitBtn" disabled>Submit for Feedback</button>
         </div>
 
@@ -79,7 +98,7 @@
           <span class="result-value" id="resultWordCount">0</span>
           <span class="result-label">Words Written</span>
         </div>
-        <div class="result-stat result-usage">
+        <div class="result-stat result-usage" id="resultUsageStat">
           <span class="result-value" id="resultUsage">0/9</span>
           <span class="result-label">Bank Words Used</span>
         </div>
