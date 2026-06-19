@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writing Practice</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/browse.css" />
+  <link rel="stylesheet" href="css/practice.css" />
+  <link rel="stylesheet" href="css/results.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Writing Practice</h1>
+    <p class="tagline">Ten words, one prompt, your story.</p>
+  </header>
+
+  <main>
+    <section class="browse-screen screen-enter" id="browseScreen" aria-labelledby="browse-heading">
+      <h2 id="browse-heading" class="sr-only">Choose a practice set</h2>
+
+      <div class="browse-toolbar">
+        <button type="button" class="surprise-btn" id="surpriseBtn">
+          <span class="surprise-btn-label">Surprise Me</span>
+          <span class="surprise-btn-sub">Pick a random set and jump right in</span>
+        </button>
+
+        <div class="filter-row" id="filterRow" role="group" aria-label="Filter sets by category"></div>
+      </div>
+
+      <div class="set-grid" id="setGrid" aria-label="Practice sets"></div>
+    </section>
+
+    <section class="practice-screen" id="practiceScreen" aria-labelledby="practice-heading" hidden>
+      <button type="button" class="back-link" id="backToBrowseBtn">&larr; Choose a different set</button>
+
+      <h2 class="practice-title" id="practiceTitle"></h2>
+      <p class="practice-prompt" id="practicePrompt"></p>
+
+      <div class="word-bank-block">
+        <p class="word-bank-label">Use these words somewhere in your writing:</p>
+        <div class="word-bank" id="wordBank" aria-label="Words to include in your writing"></div>
+      </div>
+
+      <div class="progress-row">
+        <span class="chip chip-timer" id="timerChip">Time: 0:00</span>
+        <span class="chip chip-words" id="wordCountChip">Words: 0</span>
+      </div>
+
+      <button type="button" class="primary-btn" id="startWritingBtn">Start Writing</button>
+
+      <form id="writingForm" hidden>
+        <label for="writingInput" class="sr-only">Your writing</label>
+        <textarea
+          id="writingInput"
+          rows="12"
+          placeholder="Start typing once you're ready — aim for a paragraph or two."
+          disabled
+        ></textarea>
+
+        <div class="form-footer">
+          <span class="char-counter" id="charCounter">0 / 3000</span>
+          <button type="submit" class="check-btn" id="submitBtn" disabled>Submit for Feedback</button>
+        </div>
+
+        <p class="form-error" id="formError" role="alert" hidden></p>
+      </form>
+    </section>
+
+    <section class="results-screen" id="resultsScreen" aria-labelledby="results-heading" hidden>
+      <h2 id="results-heading" tabindex="-1">Here's how it went</h2>
+
+      <div class="results-grid">
+        <div class="result-stat result-time">
+          <span class="result-value" id="resultTime">0:00</span>
+          <span class="result-label">Time</span>
+        </div>
+        <div class="result-stat result-wordcount">
+          <span class="result-value" id="resultWordCount">0</span>
+          <span class="result-label">Words Written</span>
+        </div>
+        <div class="result-stat result-usage">
+          <span class="result-value" id="resultUsage">0/9</span>
+          <span class="result-label">Bank Words Used</span>
+        </div>
+        <div class="result-stat result-issues">
+          <span class="result-value" id="resultIssues">0</span>
+          <span class="result-label">Issues Found</span>
+        </div>
+      </div>
+
+      <div class="encouragement" id="encouragementBox"></div>
+
+      <div class="legend" aria-hidden="true">
+        <span class="legend-item legend-spelling">Spelling</span>
+        <span class="legend-item legend-grammar">Grammar</span>
+        <span class="legend-item legend-style">Style &amp; Structure</span>
+      </div>
+
+      <div class="highlighted-text" id="highlightedText" aria-label="Your writing with issues highlighted"></div>
+
+      <div class="suggestions" id="suggestions" aria-live="polite"></div>
+
+      <div class="results-actions">
+        <button type="button" class="primary-btn" id="retrySetBtn">Write This Set Again</button>
+        <button type="button" class="secondary-btn" id="anotherSetBtn">Try Another Set</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Pick any of the 50 prompts, weave in the words you're given, and see exactly where your writing can tighten up.</p>
+  </footer>
+
+  <script src="js/sets.js"></script>
+  <script src="js/languagetool.js"></script>
+  <script src="js/text-utils.js"></script>
+  <script src="js/highlight.js"></script>
+  <script src="js/encouragement.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
