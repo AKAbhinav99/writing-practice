@@ -2,6 +2,7 @@
   const MIN_WORDS = 40;
   const MAX_CHARS = 3000;
   const SUBMIT_PASSWORD = "1905";
+  const DRAFT_STORAGE_KEY = "wp_draft";
 
   const browseScreen = document.getElementById("browseScreen");
   const surpriseBtn = document.getElementById("surpriseBtn");
@@ -52,6 +53,28 @@
   let timerInterval = null;
 
   writingInput.setAttribute("maxlength", String(MAX_CHARS));
+
+  // Safety net so an in-progress draft survives an accidental page refresh
+  // (e.g. while recovering from a wrong submit-password attempt) — restored
+  // automatically when the same set is reopened, cleared once a submission
+  // actually succeeds or the user explicitly chooses to leave the set.
+  function saveDraft(setId, text) {
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({ setId, text }));
+  }
+
+  function loadDraftText(setId) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || "null");
+      const hasMatchingText = saved && saved.setId === setId && typeof saved.text === "string" && saved.text.trim();
+      return hasMatchingText ? saved.text : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function clearDraft() {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+  }
 
   function elapsedSeconds() {
     return Math.floor((Date.now() - sessionStartTime) / 1000);
@@ -176,7 +199,15 @@
 
     resetPracticeForm();
     showScreen(practiceScreen);
-    startWritingBtn.focus();
+
+    const draftText = loadDraftText(set.id);
+    if (draftText) {
+      startWriting();
+      writingInput.value = draftText;
+      handleWritingInput();
+    } else {
+      startWritingBtn.focus();
+    }
   }
 
   function startWriting() {
@@ -196,6 +227,7 @@
     wordCountChip.textContent = `Words: ${window.WP.countWords(text)}`;
     charCounter.textContent = `${text.length} / ${MAX_CHARS}`;
     submitBtn.disabled = window.WP.countWords(text) < MIN_WORDS;
+    saveDraft(selectedSet.id, text);
     if (!formError.hidden) {
       formError.hidden = true;
       formError.textContent = "";
@@ -238,6 +270,7 @@
         ? await window.WP.checkTextWithGemini(text)
         : [...(await window.WP.checkText(text)), ...window.WP.runHeuristicRules(text)];
       const wordsUsedCount = window.WP.countWordsUsedFromBank(selectedSet.words, text);
+      clearDraft();
       showResults({
         set: selectedSet,
         text,
@@ -291,6 +324,7 @@
     if (hasUnsavedWriting() && !window.confirm("Leave this set? Your unsaved writing will be lost.")) {
       return;
     }
+    clearDraft();
     clearInterval(timerInterval);
     timerInterval = null;
     showScreen(browseScreen);
