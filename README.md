@@ -81,12 +81,16 @@ common mistake types, each with a "Search YouTube for ..." link — this part
 needs no API key and always works.
 
 If a Gemini key is saved, that box is upgraded: Gemini uses Google's search
-tool to look for real, specific YouTube videos that explain each mistake
-(e.g. a video on fixing comma splices) and lists those above the generic
-search link. Every URL Gemini returns is checked against a strict
-`youtube.com`/`youtu.be` pattern before it's shown, and the generic search
-link stays as a fallback either way — so a missed or imperfect AI
-suggestion never leaves you with a dead end.
+tool to look for one real, specific YouTube video per mistake (e.g. a video
+on fixing comma splices) and lists it above the generic search link.
+
+Gemini itself never gets to type out a video URL — it can only *name* a
+video; the actual link comes from Google Search's own citation data
+(`groundingMetadata`) for that exact recommendation, which is the only part
+of the response guaranteed to be a real, currently-indexed source rather
+than a plausible-looking guess. If grounding doesn't back a topic with a
+real source, that topic just keeps its generic search link — so a missed
+AI suggestion never leaves you with a dead "video unavailable" link.
 
 ## Customizing the practice sets
 

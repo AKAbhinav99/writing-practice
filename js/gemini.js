@@ -130,53 +130,78 @@
     return issues.map((issue) => toMatch(text, issue)).filter((match) => match !== null);
   }
 
+  // Asks for one plain-text line per topic instead of JSON: Gemini's Google
+  // Search grounding metadata only ever exposes real source URLs through
+  // citations (groundingChunks/groundingSupports), never as text the model
+  // can copy — so a prior version that asked Gemini to *type out* a
+  // youtube.com URL itself was just guessing plausible-looking video IDs
+  // that don't exist. This version never trusts a model-written URL; it
+  // only uses the URL Google's search backend actually attached as a
+  // citation for that line (see resolveVideoForLine below).
   function buildVideoPrompt(topics) {
     return [
-      "You are helping a writing student find real YouTube videos that teach how to fix specific writing mistakes.",
-      "Use Google Search to find videos that are actually indexed and available right now — never invent or guess a video title or URL.",
-      "For each topic below, return up to 2 videos. If you can't find a real, relevant video for a topic, leave it out of the result entirely rather than guessing.",
+      "You are helping a writing student find one real YouTube video for each writing-mistake topic below.",
+      "Use Google Search to find a specific, real, currently available video that clearly explains or helps fix each topic. Only recommend a video you actually found through search.",
       "",
-      "Respond with ONLY a raw JSON array, no markdown formatting and no code fences, shaped exactly like this:",
-      '[{"topic": "<copied exactly from the list below>", "videos": [{"title": "<the video\'s real title>", "url": "<https://www.youtube.com/watch?v=... or https://youtu.be/...>"}]}]',
+      "Reply in plain text only — no markdown, no JSON, no code fences. Write exactly one line per topic, in this exact format:",
+      "TOPIC: <topic copied exactly from the list below> :: <the video's title> — <one short clause on why it helps>",
+      "",
+      "If you can't find a real, relevant video for a topic, write that topic's line as:",
+      "TOPIC: <topic> :: NONE",
       "",
       "Topics:",
       ...topics.map((topic) => `- ${topic}`),
     ].join("\n");
   }
 
-  function isYouTubeUrl(url) {
-    try {
-      const parsed = new URL(url);
-      const host = parsed.hostname.replace(/^www\./, "").replace(/^m\./, "");
-      if (host === "youtu.be") return parsed.pathname.length > 1;
-      if (host === "youtube.com") return parsed.pathname === "/watch" && parsed.searchParams.has("v");
-      return false;
-    } catch {
-      return false;
-    }
+  const TOPIC_LINE_RE = /^\s*TOPIC:\s*(.+?)\s*::\s*(.+?)\s*$/i;
+
+  function parseTopicLines(rawText, topics) {
+    const byLowerTopic = new Map(topics.map((topic) => [topic.toLowerCase(), topic]));
+    const lines = [];
+    rawText.split("\n").forEach((line) => {
+      const match = line.match(TOPIC_LINE_RE);
+      if (!match) return;
+      const topic = byLowerTopic.get(match[1].trim().toLowerCase());
+      const label = match[2].trim();
+      if (!topic || /^none$/i.test(label)) return;
+      lines.push({ topic, label, line });
+    });
+    return lines;
   }
 
-  // Gemini's JSON-mode response schema isn't available together with the
-  // google_search tool, so we ask for raw JSON in the prompt instead and
-  // parse it leniently here (stripping any code fences the model adds).
-  function parseJsonArrayLeniently(rawText) {
-    const stripped = rawText.replace(/```json|```/gi, "").trim();
-    const start = stripped.indexOf("[");
-    const end = stripped.lastIndexOf("]");
-    if (start === -1 || end === -1 || end < start) return null;
-    try {
-      const parsed = JSON.parse(stripped.slice(start, end + 1));
-      return Array.isArray(parsed) ? parsed : null;
-    } catch {
-      return null;
-    }
+  function isYouTubeChunk(chunk) {
+    const web = chunk && chunk.web;
+    const title = web && typeof web.title === "string" ? web.title.toLowerCase() : "";
+    const uri = web && typeof web.uri === "string" ? web.uri : "";
+    return title.includes("youtube") && /^https:\/\//.test(uri);
   }
 
-  // Looks up, per writing-mistake topic, real YouTube videos found via
+  // Finds the real citation URL Google's search backend attached to a given
+  // topic's recommendation line, by matching each grounding support's exact
+  // (API-provided) segment text against that line — never by trusting any
+  // URL text the model itself produced.
+  function resolveVideoForLine(lineText, supports, chunks) {
+    const lowerLine = lineText.toLowerCase();
+    for (const support of supports) {
+      const segmentText = support && support.segment && typeof support.segment.text === "string" ? support.segment.text.trim() : "";
+      if (!segmentText || !lowerLine.includes(segmentText.toLowerCase())) continue;
+
+      const indices = Array.isArray(support.groundingChunkIndices) ? support.groundingChunkIndices : [];
+      for (const index of indices) {
+        const chunk = chunks[index];
+        if (isYouTubeChunk(chunk)) return chunk.web.uri;
+      }
+    }
+    return null;
+  }
+
+  // Looks up, per writing-mistake topic, a real YouTube video found via
   // Gemini's Google Search grounding tool. Returns a map of lowercase topic
-  // -> [{ title, url }], omitting any topic Gemini couldn't back with a
-  // real-looking YouTube URL. Never throws — callers should treat a missing
-  // or empty result as "no AI suggestions available" and fall back to a
+  // -> [{ title, url }], where every url is a verified citation link Google's
+  // search backend actually returned for that exact recommendation — not
+  // text Gemini typed itself. Never throws — callers should treat a missing
+  // or empty result as "no AI suggestion available" and fall back to a
   // plain YouTube search link instead.
   async function findVideosForTopics(topics) {
     const apiKey = getGeminiApiKey();
@@ -207,22 +232,16 @@
     const rawText = extractResponseText(data);
     if (!rawText) return {};
 
-    const parsed = parseJsonArrayLeniently(rawText);
-    if (!parsed) return {};
+    const candidate = Array.isArray(data.candidates) ? data.candidates[0] : null;
+    const metadata = candidate && candidate.groundingMetadata;
+    const chunks = metadata && Array.isArray(metadata.groundingChunks) ? metadata.groundingChunks : [];
+    const supports = metadata && Array.isArray(metadata.groundingSupports) ? metadata.groundingSupports : [];
+    if (chunks.length === 0 || supports.length === 0) return {};
 
     const result = {};
-    parsed.forEach((entry) => {
-      if (!entry || typeof entry.topic !== "string" || !Array.isArray(entry.videos)) return;
-      const videos = entry.videos
-        .filter((video) => video && typeof video.url === "string" && isYouTubeUrl(video.url))
-        .slice(0, 2)
-        .map((video) => ({
-          title: typeof video.title === "string" && video.title.trim() ? video.title.trim() : "Watch on YouTube",
-          url: video.url,
-        }));
-      if (videos.length > 0) {
-        result[entry.topic.trim().toLowerCase()] = videos;
-      }
+    parseTopicLines(rawText, topics).forEach(({ topic, label, line }) => {
+      const url = resolveVideoForLine(line, supports, chunks);
+      if (url) result[topic.toLowerCase()] = [{ title: label, url }];
     });
     return result;
   }
