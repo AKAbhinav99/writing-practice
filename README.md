@@ -33,7 +33,9 @@ python3 -m http.server 8000
 
 - **Choose a practice set** from the grid of 50, or hit **Surprise Me** for
   a random one. Filter by category (Travel & Adventure, Science &
-  Discovery, etc.) with the chips above the grid.
+  Discovery, etc.) with the chips above the grid — **Surprise Me** picks
+  only from whichever category is currently selected (or the full set of
+  50 if you haven't filtered).
 - Each set gives you a one-line prompt and 8-10 words to work into your
   writing. **Start Writing** begins the timer and opens the text box.
 - **Submit for Feedback** (enabled once you've written at least 40 words)
@@ -44,6 +46,9 @@ python3 -m http.server 8000
   - Your writing with spelling, grammar, and style/structure issues
     underlined in different colors (hover or focus a highlight to see the
     explanation), plus the same issues listed below with suggested fixes.
+  - A **"Brush up on these"** box grouping your most common mistakes (e.g.
+    comma splices, subject-verb agreement) with links to relevant YouTube
+    videos — see below for how those are found.
 - **Write This Set Again** restarts the same set from a blank page;
   **Try Another Set** goes back to the grid.
 
@@ -68,6 +73,20 @@ other file — always enter it through the Settings panel in the running
 page.
 
 To change the model, edit the `MODEL` constant in `js/gemini.js`.
+
+### Suggested videos for your mistakes
+
+The results screen always shows a "Brush up on these" box for your most
+common mistake types, each with a "Search YouTube for ..." link — this part
+needs no API key and always works.
+
+If a Gemini key is saved, that box is upgraded: Gemini uses Google's search
+tool to look for real, specific YouTube videos that explain each mistake
+(e.g. a video on fixing comma splices) and lists those above the generic
+search link. Every URL Gemini returns is checked against a strict
+`youtube.com`/`youtu.be` pattern before it's shown, and the generic search
+link stays as a fallback either way — so a missed or imperfect AI
+suggestion never leaves you with a dead end.
 
 ## Customizing the practice sets
 

@@ -36,6 +36,19 @@
     return "style";
   }
 
+  // LanguageTool matches don't carry our own `topic` field (that's added by
+  // grammar-rules.js and gemini.js), so derive a human-readable label for
+  // the suggested-videos feature from whichever field LanguageTool gives us
+  // — rule.description is usually the most specific.
+  function deriveTopic(match) {
+    const raw =
+      (match && match.rule && match.rule.description) ||
+      (match && match.shortMessage) ||
+      (match && match.rule && match.rule.category && match.rule.category.name) ||
+      "";
+    return raw.trim() || null;
+  }
+
   window.WP = window.WP || {};
-  Object.assign(window.WP, { checkText, categorize });
+  Object.assign(window.WP, { checkText, categorize, deriveTopic });
 })();

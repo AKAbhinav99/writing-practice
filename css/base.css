@@ -287,6 +287,7 @@ footer {
   .primary-btn,
   .secondary-btn,
   .back-link,
+  .video-link,
   .screen-enter {
     transition: none;
     animation: none;

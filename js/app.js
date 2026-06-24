@@ -34,6 +34,7 @@
   const encouragementBox = document.getElementById("encouragementBox");
   const highlightedText = document.getElementById("highlightedText");
   const suggestions = document.getElementById("suggestions");
+  const videoSuggestions = document.getElementById("videoSuggestions");
   const resultsHeading = document.getElementById("results-heading");
   const retrySetBtn = document.getElementById("retrySetBtn");
   const anotherSetBtn = document.getElementById("anotherSetBtn");
@@ -276,6 +277,7 @@
 
     window.WP.renderHighlightedText(highlightedText, text, matches);
     window.WP.renderSuggestions(suggestions, text, matches);
+    window.WP.loadVideoSuggestions(videoSuggestions, matches);
 
     showScreen(resultsScreen);
     resultsHeading.focus();
@@ -305,7 +307,9 @@
   syncSettingsStatus();
 
   surpriseBtn.addEventListener("click", () => {
-    const randomSet = PRACTICE_SETS[Math.floor(Math.random() * PRACTICE_SETS.length)];
+    const pool =
+      currentFilter === "all" ? PRACTICE_SETS : PRACTICE_SETS.filter((set) => set.category === currentFilter);
+    const randomSet = pool[Math.floor(Math.random() * pool.length)];
     openPracticeScreen(randomSet);
   });
 

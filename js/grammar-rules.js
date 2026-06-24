@@ -79,13 +79,18 @@
 
   const SUBORDINATORS = ["although", "though", "even though", "because", "since", "while", "whereas"];
 
-  function buildMatch(offset, length, message, replacements) {
+  // `topic` is a short, consistent label for the writing skill the rule
+  // covers (e.g. "comma splices") — used to group issues for the
+  // suggested-videos feature, separate from the spelling/grammar/style
+  // bucket used for highlighting.
+  function buildMatch(offset, length, message, replacements, topic) {
     return {
       offset,
       length,
       message,
       replacements: replacements || [],
       rule: { issueType: "grammar", category: { id: "GRAMMAR" } },
+      topic: topic || null,
     };
   }
 
@@ -143,7 +148,8 @@
               commaOffset,
               1,
               "This may be a comma splice — two complete sentences joined only by a comma. Try a period, a semicolon, or adding a conjunction.",
-              [{ value: "." }, { value: ";" }, { value: ", and" }]
+              [{ value: "." }, { value: ";" }, { value: ", and" }],
+              "comma splices"
             )
           );
         }
@@ -174,7 +180,9 @@
           buildMatch(
             sentence.start + leadingLength,
             firstWord.length,
-            `This sentence may be missing a subject before "${firstWord}" (e.g., "I ${lower}...", "She ${lower}...").`
+            `This sentence may be missing a subject before "${firstWord}" (e.g., "I ${lower}...", "She ${lower}...").`,
+            undefined,
+            "sentence fragments"
           )
         );
       }
@@ -202,7 +210,8 @@
             match.index,
             match[0].length,
             `"${first}" and "${second}" both signal the same kind of contrast or addition — keep one.`,
-            [{ value: match[1] }, { value: match[2] }]
+            [{ value: match[1] }, { value: match[2] }],
+            "redundant conjunctions"
           )
         );
       }
@@ -217,7 +226,9 @@
         buildMatch(
           butIndex,
           crossMatch[2].length,
-          `This clause already opens with "${crossMatch[1]}" — you likely don't need "${crossMatch[2]}" too. Drop one of them.`
+          `This clause already opens with "${crossMatch[1]}" — you likely don't need "${crossMatch[2]}" too. Drop one of them.`,
+          undefined,
+          "redundant conjunctions"
         )
       );
     }
@@ -250,7 +261,8 @@
           verbOffset,
           verb.length,
           `"${ofMatch[1]}" takes a singular verb even with a plural noun after "of" — use "${PLURAL_TO_SINGULAR_VERB[verb.toLowerCase()]}" instead of "${verb}".`,
-          [{ value: PLURAL_TO_SINGULAR_VERB[verb.toLowerCase()] }]
+          [{ value: PLURAL_TO_SINGULAR_VERB[verb.toLowerCase()] }],
+          "subject-verb agreement"
         )
       );
     }
@@ -268,7 +280,8 @@
           verbOffset,
           verb.length,
           `"${standaloneMatch[1]}" is singular — use "${PLURAL_TO_SINGULAR_VERB[verb.toLowerCase()]}" instead of "${verb}".`,
-          [{ value: PLURAL_TO_SINGULAR_VERB[verb.toLowerCase()] }]
+          [{ value: PLURAL_TO_SINGULAR_VERB[verb.toLowerCase()] }],
+          "subject-verb agreement"
         )
       );
     }
