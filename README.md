@@ -1,6 +1,6 @@
 # Writing Practice
 
-A free-writing practice tool. Pick one of 50 prompts, weave a set of 8-10
+A free-writing practice tool. Pick one of 50 prompts, weave a set of 12
 given words into a paragraph or two, and get back spelling, grammar, and
 style feedback with the exact spots highlighted — plus how long it took you.
 
@@ -36,8 +36,10 @@ python3 -m http.server 8000
   Discovery, etc.) with the chips above the grid — **Surprise Me** picks
   only from whichever category is currently selected (or the full set of
   50 if you haven't filtered).
-- Each set gives you a one-line prompt and 8-10 words to work into your
-  writing. **Start Writing** begins the timer and opens the text box.
+- Each set gives you a one-line prompt and 12 words to work into your
+  writing — any tense of a word counts (e.g. "run" still counts a draft
+  that only used "running" or "ran"). **Start Writing** begins the timer
+  and opens the text box.
 - **Submit for Feedback** (enabled once you've written at least 40 words)
   sends your text to LanguageTool and takes you to a results screen with:
   - Time taken, words written, how many of the assigned words you used,
