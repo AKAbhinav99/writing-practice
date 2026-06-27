@@ -51,6 +51,19 @@
   background: color-mix(in oklab, var(--color-accent) 12%, var(--color-surface));
   border: 1px solid color-mix(in oklab, var(--color-accent) 35%, var(--color-border));
   color: var(--color-accent-dark);
+  transition: background var(--duration-fast) var(--ease-out-expo),
+    border-color var(--duration-fast) var(--ease-out-expo),
+    color var(--duration-fast) var(--ease-out-expo);
+}
+
+.word-chip.is-used {
+  background: color-mix(in oklab, var(--color-style) 18%, var(--color-surface));
+  border-color: color-mix(in oklab, var(--color-style) 50%, var(--color-border));
+  color: var(--color-style);
+}
+
+.word-chip.is-used::before {
+  content: "✓ ";
 }
 
 .progress-row {
@@ -67,6 +80,12 @@
 }
 
 .chip-words {
+  font-variant-numeric: tabular-nums;
+}
+
+.chip-bank {
+  color: var(--color-style);
+  border-color: color-mix(in oklab, var(--color-style) 40%, var(--color-border));
   font-variant-numeric: tabular-nums;
 }
 

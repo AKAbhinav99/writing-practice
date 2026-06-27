@@ -1,6 +1,5 @@
 (() => {
   const MIN_WORDS = 40;
-  const MAX_CHARS = 3000;
   const SUBMIT_PASSWORD = "1905";
   const DRAFT_STORAGE_KEY = "wp_draft";
 
@@ -18,6 +17,7 @@
   const wordBank = document.getElementById("wordBank");
   const timerChip = document.getElementById("timerChip");
   const wordCountChip = document.getElementById("wordCountChip");
+  const bankUsageChip = document.getElementById("bankUsageChip");
   const startWritingBtn = document.getElementById("startWritingBtn");
   const writingForm = document.getElementById("writingForm");
   const writingInput = document.getElementById("writingInput");
@@ -33,6 +33,7 @@
   const resultUsage = document.getElementById("resultUsage");
   const resultIssues = document.getElementById("resultIssues");
   const encouragementBox = document.getElementById("encouragementBox");
+  const flowReport = document.getElementById("flowReport");
   const highlightedText = document.getElementById("highlightedText");
   const suggestions = document.getElementById("suggestions");
   const videoSuggestions = document.getElementById("videoSuggestions");
@@ -51,8 +52,7 @@
   let selectedSet = null;
   let sessionStartTime = null;
   let timerInterval = null;
-
-  writingInput.setAttribute("maxlength", String(MAX_CHARS));
+  let wordChipElements = [];
 
   // Safety net so an in-progress draft survives an accidental page refresh
   // (e.g. while recovering from a wrong submit-password attempt) — restored
@@ -176,9 +176,12 @@
     submitPassword.value = "";
     submitBtn.disabled = true;
     submitBtn.textContent = "Submit for Feedback";
-    charCounter.textContent = `0 / ${MAX_CHARS}`;
+    charCounter.textContent = "0 characters";
     wordCountChip.textContent = "Words: 0";
     timerChip.textContent = "Time: 0:00";
+    bankUsageChip.hidden = selectedSet.words.length === 0;
+    bankUsageChip.textContent = `Bank words: 0/${selectedSet.words.length}`;
+    wordChipElements.forEach((chip) => chip.classList.remove("is-used"));
     formError.hidden = true;
     formError.textContent = "";
   }
@@ -190,11 +193,12 @@
 
     wordBankBlock.hidden = set.words.length === 0;
     wordBank.textContent = "";
-    set.words.forEach((word) => {
+    wordChipElements = set.words.map((word) => {
       const chip = document.createElement("span");
       chip.className = "word-chip";
       chip.textContent = word;
       wordBank.appendChild(chip);
+      return chip;
     });
 
     resetPracticeForm();
@@ -225,13 +229,23 @@
   function handleWritingInput() {
     const text = writingInput.value;
     wordCountChip.textContent = `Words: ${window.WP.countWords(text)}`;
-    charCounter.textContent = `${text.length} / ${MAX_CHARS}`;
+    charCounter.textContent = `${text.length} character${text.length === 1 ? "" : "s"}`;
     submitBtn.disabled = window.WP.countWords(text) < MIN_WORDS;
+    updateBankUsage(text);
     saveDraft(selectedSet.id, text);
     if (!formError.hidden) {
       formError.hidden = true;
       formError.textContent = "";
     }
+  }
+
+  function updateBankUsage(text) {
+    if (selectedSet.words.length === 0) return;
+    const usedWords = new Set(window.WP.usedBankWords(selectedSet.words, text));
+    bankUsageChip.textContent = `Bank words: ${usedWords.size}/${selectedSet.words.length}`;
+    wordChipElements.forEach((chip, index) => {
+      chip.classList.toggle("is-used", usedWords.has(selectedSet.words[index]));
+    });
   }
 
   async function handleSubmit(event) {
@@ -307,6 +321,8 @@
       elapsedSeconds: seconds,
     });
     window.WP.renderEncouragement(encouragementBox, encouragement);
+
+    window.WP.renderFlowReport(flowReport, window.WP.analyzeFlow(text));
 
     window.WP.renderHighlightedText(highlightedText, text, matches);
     window.WP.renderSuggestions(suggestions, text, matches);

@@ -78,6 +78,7 @@
       <div class="progress-row">
         <span class="chip chip-timer" id="timerChip">Time: 0:00</span>
         <span class="chip chip-words" id="wordCountChip">Words: 0</span>
+        <span class="chip chip-bank" id="bankUsageChip">Bank words: 0/0</span>
       </div>
 
       <button type="button" class="primary-btn" id="startWritingBtn">Start Writing</button>
@@ -92,7 +93,7 @@
         ></textarea>
 
         <div class="form-footer">
-          <span class="char-counter" id="charCounter">0 / 3000</span>
+          <span class="char-counter" id="charCounter">0 characters</span>
 
           <div class="password-row">
             <label for="submitPassword">Submit Password</label>
@@ -136,6 +137,8 @@
 
       <div class="encouragement" id="encouragementBox"></div>
 
+      <div class="flow-report" id="flowReport"></div>
+
       <div class="legend" aria-hidden="true">
         <span class="legend-item legend-spelling">Spelling</span>
         <span class="legend-item legend-grammar">Grammar</span>
@@ -165,6 +168,7 @@
   <script src="js/gemini.js"></script>
   <script src="js/videos.js"></script>
   <script src="js/text-utils.js"></script>
+  <script src="js/flow.js"></script>
   <script src="js/highlight.js"></script>
   <script src="js/encouragement.js"></script>
   <script src="js/app.js"></script>
